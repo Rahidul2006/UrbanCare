@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, Shield, Menu, X, Settings } from 'lucide-react';
 import { Button } from './components/ui/button';
 import { CitizenInterface } from './components/CitizenInterface';
@@ -66,6 +66,28 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [selectedRole, setSelectedRole] = useState<'citizen' | 'admin' | 'central-admin'>('citizen');
+
+  // *START: ADDED CODE FOR ZOHO SALESIQ WIDGET*
+  useEffect(() => {
+    // 1. Initialize the global zoho object if it doesn't exist
+    window.$zoho = window.$zoho || {};
+    window.$zoho.salesiq = window.$zoho.salesiq || { ready: function () {} };
+
+    // 2. Create and append the script element
+    const script = document.createElement('script');
+    script.id = 'zsiqscript';
+    script.src = "https://salesiq.zohopublic.in/widget?wc=siq7b15ece17fe19d8c68f07da098b929c8f0bddb9f78d1a12599405f3fe7f57211";
+    script.defer = true;
+    document.body.appendChild(script);
+
+    // 3. Cleanup function to remove the script when the component unmounts
+    return () => {
+      document.body.removeChild(script);
+      // Optional: Clean up global state if necessary, but often left alone for widgets
+      // delete window.$zoho; 
+    };
+  }, []); // Empty dependency array ensures this runs only once on mount
+  // *END: ADDED CODE FOR ZOHO SALESIQ WIDGET*
 
   // Handle role selection (shows auth modal)
   const handleRoleSelection = (role: 'citizen' | 'admin' | 'central-admin') => {
