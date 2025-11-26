@@ -1,30 +1,27 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Users, Shield, Menu, X, Settings } from 'lucide-react';
-import { Button } from './components/ui/button';
+import { Button } from './components/button';
 import { CitizenInterface } from './components/CitizenInterface';
 import { AdminInterface } from './components/AdminInterface';
 import { CentralAdminDashboard } from './components/CentralAdminDashboard';
-import { Card, CardContent } from './components/ui/card';
-import { Badge } from './components/ui/badge';
+import { Card, CardContent } from './components/card';
+import { Badge } from './components/badge';
 import { AuthModal } from './components/AuthModal';
 
-// Mock user types
-type UserRole = 'citizen' | 'admin' | 'central-admin' | null;
-
-// Demo user database
+// Mock user types and data
 const demoUsers = {
   citizen: [
     {
       id: '1',
       name: 'Alex Johnson',
       email: 'alex@example.com',
-      role: 'citizen' as const
+      role: 'citizen'
     },
     {
       id: '2', 
       name: 'Maria Garcia',
       email: 'maria@example.com',
-      role: 'citizen' as const
+      role: 'citizen'
     }
   ],
   admin: [
@@ -32,14 +29,14 @@ const demoUsers = {
       id: 'admin1',
       name: 'Sarah Martinez', 
       email: 'admin@city.gov',
-      role: 'admin' as const,
+      role: 'admin',
       department: 'Public Works'
     },
     {
       id: 'admin2',
       name: 'Mike Wilson',
       email: 'mike@city.gov', 
-      role: 'admin' as const,
+      role: 'admin',
       department: 'Electrical Services'
     }
   ],
@@ -48,33 +45,33 @@ const demoUsers = {
       id: 'central-admin-1',
       name: 'Sarah Johnson',
       email: 'central.admin@city.gov',
-      role: 'central-admin' as const,
+      role: 'central-admin',
       avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612a94c?w=100&h=100&fit=crop&crop=face'
     },
     {
       id: 'central-admin-2',
       name: 'Michael Chen',
       email: 'system.admin@city.gov',
-      role: 'central-admin' as const,
+      role: 'central-admin',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face'
     }
   ]
 };
 
 export default function App() {
-  const [userRole, setUserRole] = useState<UserRole>(null);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userRole, setUserRole] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<'citizen' | 'admin' | 'central-admin'>('citizen');
+  const [selectedRole, setSelectedRole] = useState('citizen');
 
   // Handle role selection (shows auth modal)
-  const handleRoleSelection = (role: 'citizen' | 'admin' | 'central-admin') => {
+  const handleRoleSelection = (role) => {
     setSelectedRole(role);
     setShowAuthModal(true);
   };
 
   // Handle successful authentication
-  const handleAuthLogin = (email: string, password: string) => {
+  const handleAuthLogin = (email, password) => {
     // Find user by email in the selected role group
     const users = demoUsers[selectedRole];
     const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
