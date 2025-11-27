@@ -10,6 +10,7 @@ import { AdminDashboard } from './AdminDashboard';
 import { IssueManagement } from './IssueManagement';
 import { AdminAnalytics } from './AdminAnalytics';
 import { mockIssues, mockAnalytics } from '../data/mockData';
+import { roleColors } from '../utils/roleColors';
 
 export function AdminInterface({ currentUser }) {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -50,6 +51,7 @@ export function AdminInterface({ currentUser }) {
   };
 
   const stats = getDashboardStats();
+  const colors = roleColors.admin;
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -63,37 +65,37 @@ export function AdminInterface({ currentUser }) {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-        <Card>
+        <Card className="hover:shadow-lg transition">
           <CardContent className="p-4 text-center">
-            <div className="text-2xl text-blue-600 mb-1">{stats.totalIssues}</div>
+            <div className={`text-2xl ${colors.text} mb-1`}>{stats.totalIssues}</div>
             <div className="text-sm text-gray-600">Total Issues</div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-lg transition">
           <CardContent className="p-4 text-center">
-            <div className="text-2xl text-orange-600 mb-1">{stats.pendingIssues}</div>
+            <div className={`text-2xl ${colors.text} mb-1`}>{stats.pendingIssues}</div>
             <div className="text-sm text-gray-600">Pending Review</div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-lg transition">
           <CardContent className="p-4 text-center">
-            <div className="text-2xl text-purple-600 mb-1">{stats.inProgressIssues}</div>
+            <div className={`text-2xl ${colors.text} mb-1`}>{stats.inProgressIssues}</div>
             <div className="text-sm text-gray-600">In Progress</div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-lg transition">
           <CardContent className="p-4 text-center">
-            <div className="text-2xl text-green-600 mb-1">{stats.resolvedToday}</div>
+            <div className={`text-2xl ${colors.text} mb-1`}>{stats.resolvedToday}</div>
             <div className="text-sm text-gray-600">Resolved Today</div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-lg transition">
           <CardContent className="p-4 text-center">
-            <div className="text-2xl text-red-600 mb-1">{stats.urgentIssues}</div>
+            <div className={`text-2xl ${colors.text} mb-1`}>{stats.urgentIssues}</div>
             <div className="text-sm text-gray-600">Urgent Issues</div>
           </CardContent>
         </Card>

@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs';
 import { ReportIssueForm } from './ReportIssueForm';
 import { IssueCard } from './IssueCard';
 import { mockIssues } from '../data/mockData';
+import { roleColors } from '../utils/roleColors';
 
 export function CitizenInterface({ currentUser }) {
   const [showReportForm, setShowReportForm] = useState(false);
@@ -29,6 +30,7 @@ export function CitizenInterface({ currentUser }) {
   };
 
   const stats = getStatusStats();
+  const colors = roleColors.citizen;
 
   if (showReportForm) {
     return (
@@ -49,21 +51,21 @@ export function CitizenInterface({ currentUser }) {
         
         {/* Quick Stats */}
         <div className="grid grid-cols-3 gap-4 mb-6">
-          <Card className="text-center">
+          <Card className="text-center hover:shadow-lg transition">
             <CardContent className="p-4">
-              <div className="text-2xl text-orange-600 mb-1">{stats.submitted}</div>
+              <div className={`text-2xl ${colors.text} mb-1`}>{stats.submitted}</div>
               <div className="text-sm text-gray-600">Pending Review</div>
             </CardContent>
           </Card>
-          <Card className="text-center">
+          <Card className="text-center hover:shadow-lg transition">
             <CardContent className="p-4">
-              <div className="text-2xl text-blue-600 mb-1">{stats.inProgress}</div>
+              <div className={`text-2xl ${colors.text} mb-1`}>{stats.inProgress}</div>
               <div className="text-sm text-gray-600">In Progress</div>
             </CardContent>
           </Card>
-          <Card className="text-center">
+          <Card className="text-center hover:shadow-lg transition">
             <CardContent className="p-4">
-              <div className="text-2xl text-green-600 mb-1">{stats.resolved}</div>
+              <div className={`text-2xl ${colors.text} mb-1`}>{stats.resolved}</div>
               <div className="text-sm text-gray-600">Resolved</div>
             </CardContent>
           </Card>
@@ -72,7 +74,7 @@ export function CitizenInterface({ currentUser }) {
         {/* Report Issue Button */}
         <Button 
           onClick={() => setShowReportForm(true)}
-          className="w-full h-14 text-lg mb-6"
+          className={`w-full h-14 text-lg mb-6 ${colors.button} text-white font-semibold hover:opacity-90`}
           size="lg"
         >
           <Plus className="w-5 h-5 mr-2" />
