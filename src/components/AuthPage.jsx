@@ -159,16 +159,25 @@ export function AuthPage({ onLogin }) {
   const colors = currentConfig.colors;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      {/* Animated Background */}
-      <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900" />
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full mix-blend-multiply filter blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-700" />
-        <div className="absolute -top-40 right-0 w-80 h-80 bg-cyan-500/5 rounded-full mix-blend-multiply filter blur-3xl" />
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Image with Gradient Overlay */}
+      <div className="fixed inset-0 -z-10">
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: 'url("https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=1920&h=1080&fit=crop")',
+          }}
+        />
+        {/* Gradient Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900/70 via-slate-800/50 to-purple-900/70" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+        
+        {/* Animated Blur Elements */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full mix-blend-multiply filter blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-700" />
       </div>
 
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md relative z-10">
         {/* Main Card */}
         <div className="backdrop-blur-2xl bg-white/10 border border-white/20 rounded-3xl shadow-2xl overflow-hidden transform transition-all duration-500 hover:shadow-3xl hover:border-white/30">
           {/* Gradient Header */}
