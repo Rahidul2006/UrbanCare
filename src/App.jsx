@@ -1,91 +1,30 @@
 import { useState } from 'react';
-import { Users, Shield, Menu, X, Settings } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Button } from './components/button';
 import { CitizenInterface } from './components/CitizenInterface';
 import { AdminInterface } from './components/AdminInterface';
 import { CentralAdminDashboard } from './components/CentralAdminDashboard';
-import { Card, CardContent } from './components/card';
 import { Badge } from './components/badge';
-import { AuthModal } from './components/AuthModal';
-
-// Mock user types and data
-const demoUsers = {
-  citizen: [
-    {
-      id: '1',
-      name: 'Alex Johnson',
-      email: 'alex@example.com',
-      role: 'citizen'
-    },
-    {
-      id: '2', 
-      name: 'Maria Garcia',
-      email: 'maria@example.com',
-      role: 'citizen'
-    }
-  ],
-  admin: [
-    {
-      id: 'admin1',
-      name: 'Sarah Martinez', 
-      email: 'admin@city.gov',
-      role: 'admin',
-      department: 'Public Works'
-    },
-    {
-      id: 'admin2',
-      name: 'Mike Wilson',
-      email: 'mike@city.gov', 
-      role: 'admin',
-      department: 'Electrical Services'
-    }
-  ],
-  'central-admin': [
-    {
-      id: 'central-admin-1',
-      name: 'Sarah Johnson',
-      email: 'central.admin@city.gov',
-      role: 'central-admin',
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612a94c?w=100&h=100&fit=crop&crop=face'
-    },
-    {
-      id: 'central-admin-2',
-      name: 'Michael Chen',
-      email: 'system.admin@city.gov',
-      role: 'central-admin',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face'
-    }
-  ]
-};
+import { AuthPage } from './components/AuthPage';
+import { roleColors, getLandingGradient } from './utils/roleColors';
 
 export default function App() {
   const [userRole, setUserRole] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [selectedRole, setSelectedRole] = useState('citizen');
 
-  // Handle role selection (shows auth modal)
-  const handleRoleSelection = (role) => {
-    setSelectedRole(role);
-    setShowAuthModal(true);
-  };
-
-  // Handle successful authentication
-  const handleAuthLogin = (email, password) => {
-    // Find user by email in the selected role group
-    const users = demoUsers[selectedRole];
-    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  // Handle successful authentication from AuthPage
+  const handleAuthLogin = (email, password, role) => {
+    // Create user object from authentication
+    const user = {
+      id: `${role}-${Date.now()}`,
+      name: email.split('@')[0], // Fallback name from email
+      email: email.toLowerCase(),
+      role: role,
+      department: role === 'admin' ? 'Municipal Services' : undefined
+    };
     
-    if (user) {
-      setCurrentUser(user);
-      setUserRole(selectedRole);
-      setShowAuthModal(false);
-    }
-  };
-
-  // Handle auth modal close
-  const handleAuthClose = () => {
-    setShowAuthModal(false);
+    setCurrentUser(user);
+    setUserRole(role);
   };
 
   const handleLogout = () => {
@@ -96,66 +35,21 @@ export default function App() {
   // Landing page when not logged in
   if (!userRole) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="container mx-auto px-4 py-8">
+      <div className={`min-h-screen bg-gradient-to-br ${getLandingGradient('citizen')} flex items-center justify-center p-4`}>
+        <div className="w-full max-w-2xl">
           {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-lg">
               UrbanCare
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-blue-100 max-w-2xl mx-auto">
               Empowering communities to report civic issues and enabling municipalities to respond efficiently
             </p>
           </div>
 
-          
-          {/* Login Options */}
-          <div className="max-w-md mx-auto space-y-4">
-            <h2 className="text-2xl text-center text-gray-900 mb-6">Choose Your Role</h2>
-            
-            <Button 
-              onClick={() => handleRoleSelection('citizen')}
-              className="w-full h-14 text-lg"
-              variant="default"
-            >
-              <Users className="w-5 h-5 mr-2" />
-              Continue as Citizen
-            </Button>
-
-            <Button 
-              onClick={() => handleRoleSelection('admin')}
-              className="w-full h-14 text-lg"
-              variant="outline"
-            >
-              <Shield className="w-5 h-5 mr-2" />
-              Municipal Staff Login
-            </Button>
-
-            <Button 
-              onClick={() => handleRoleSelection('central-admin')}
-              className="w-full h-14 text-lg"
-              variant="secondary"
-            >
-              <Settings className="w-5 h-5 mr-2" />
-              Central Admin Login
-            </Button>
-
-
-            <div className="text-center text-sm text-gray-500 mt-4">
-              <p>Demo application - Choose any role to explore</p>
-            </div>
-          </div>
-
-          
+          {/* Authentication Form */}
+          <AuthPage onLogin={handleAuthLogin} />
         </div>
-        
-        {/* Authentication Modal */}
-        <AuthModal
-          isOpen={showAuthModal}
-          userRole={selectedRole}
-          onClose={handleAuthClose}
-          onLogin={handleAuthLogin}
-        />
       </div>
     );
   }
@@ -166,26 +60,29 @@ export default function App() {
     return <CentralAdminDashboard currentUser={currentUser} onLogout={handleLogout} />;
   }
 
+  const roleColorScheme = roleColors[userRole];
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className={`${roleColorScheme.header} text-white shadow-lg border-b`}>
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <h1 className="text-xl font-bold text-gray-900">UrbanCare</h1>
-              <Badge variant={userRole === 'admin' ? 'default' : 'secondary'}>
+              <h1 className="text-2xl font-bold">UrbanCare</h1>
+              <Badge className={`${roleColorScheme.badge} font-semibold`}>
                 {userRole === 'admin' ? 'Municipal Staff' : 'Citizen'}
               </Badge>
             </div>
             
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-white/90">
                 Welcome, {currentUser?.name}
               </span>
               <Button 
                 variant="outline" 
                 size="sm"
+                className="border-white text-white hover:bg-white/20"
                 onClick={handleLogout}
               >
                 <X className="w-4 h-4 mr-1" />
