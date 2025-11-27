@@ -4,6 +4,15 @@ A modern web application for citizens to report civic issues and municipalities 
 
 ---
 
+# Civic Issue Reporting App
+  This is a code bundle for Civic Issue Reporting App. 
+## Running the code
+
+  Run `npm i` to install the dependencies.
+
+  Run `npm run dev` to start the development server.
+  ## live project : https://urbanca.netlify.app/
+
 ## 📋 Table of Contents
 
 1. [Quick Start](#quick-start)
