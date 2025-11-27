@@ -185,7 +185,7 @@ export function AuthPage({ onLogin }) {
         <CardContent className="p-8">
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-6">
-            <TabsList className="grid w-full grid-cols-3 bg-gray-100">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="citizen">Citizen</TabsTrigger>
               <TabsTrigger value="admin">Admin</TabsTrigger>
               <TabsTrigger value="central-admin">Central Admin</TabsTrigger>
@@ -219,7 +219,7 @@ export function AuthPage({ onLogin }) {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Enter your full name"
-                  className="h-11 bg-gray-50 border-gray-200 focus:bg-white transition"
+                  className="h-11 bg-gray-50 focus:bg-white transition"
                   disabled={isLoading}
                 />
               </div>
@@ -234,7 +234,7 @@ export function AuthPage({ onLogin }) {
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value)}
                   placeholder="Enter your mobile number (10+ digits)"
-                  className="h-11 bg-gray-50 border-gray-200 focus:bg-white transition"
+                  className="h-11 bg-gray-50  focus:bg-white transition"
                   disabled={isLoading}
                 />
               </div>
@@ -248,7 +248,7 @@ export function AuthPage({ onLogin }) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
-                className="h-11 bg-gray-50 border-gray-200 focus:bg-white transition"
+                className="h-11 bg-gray-50 focus:bg-white transition"
                 disabled={isLoading}
               />
             </div>
@@ -262,7 +262,7 @@ export function AuthPage({ onLogin }) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="h-11 bg-gray-50 border-gray-200 focus:bg-white transition pr-10"
+                  className="h-11 bg-gray-50 focus:bg-white transition pr-10"
                   disabled={isLoading}
                 />
                 <button
@@ -302,7 +302,7 @@ export function AuthPage({ onLogin }) {
           {/* Register/Login Toggle for Citizen */}
           {activeTab === 'citizen' && (
             <div className="mt-4 text-center">
-              <p className="text-gray-600 text-sm">
+              <p className="text-white text-sm">
                 {isRegister ? 'Already have an account?' : "Don't have an account?"}
                 <button
                   type="button"
