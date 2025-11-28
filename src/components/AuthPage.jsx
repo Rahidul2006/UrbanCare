@@ -159,187 +159,216 @@ export function AuthPage({ onLogin }) {
   const colors = currentConfig.colors;
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      <Card className="shadow-2xl overflow-hidden">
-        {/* Gradient Header */}
-        <div className={`${colors.bg} p-8 text-white relative overflow-hidden`}>
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0" style={{
-              backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%)',
-            }}></div>
-          </div>
-          
-          <div className="relative flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                <IconComponent className="w-6 h-6" />
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Image with Gradient Overlay */}
+      <div className="fixed inset-0 -z-10">
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: 'url("https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=1920&h=1080&fit=crop")',
+          }}
+        />
+        {/* Gradient Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900/70 via-slate-800/50 to-purple-900/70" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+        
+        {/* Animated Blur Elements */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full mix-blend-multiply filter blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-700" />
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
+        {/* Main Card */}
+        <div className="backdrop-blur-2xl bg-white/10 border border-white/20 rounded-3xl shadow-2xl overflow-hidden transform transition-all duration-500 hover:shadow-3xl hover:border-white/30">
+          {/* Gradient Header */}
+          <div className={`relative overflow-hidden px-8 py-12 ${colors.bg}`}>
+            <div className="absolute inset-0 opacity-30">
+              <div className="absolute inset-0" style={{
+                backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)',
+              }}></div>
+            </div>
+            
+            <div className="relative text-center">
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-xl border border-white/30 transform transition-transform duration-300 hover:scale-110">
+                  <IconComponent className="w-8 h-8 text-white" />
+                </div>
               </div>
-              <div>
-                <h2 className="text-2xl font-bold">UrbanCare</h2>
-                <p className="text-white/80 text-sm">{isRegister ? 'Create Account' : 'Welcome Back'}</p>
-              </div>
+              <h1 className="text-4xl font-bold text-white mb-2">UrbanCare</h1>
+              <p className="text-white/70 text-sm font-medium">{isRegister ? 'Create Your Account' : 'Welcome Back'}</p>
             </div>
           </div>
-        </div>
 
-        <CardContent className="p-8">
-          {/* Tabs */}
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-6">
-            <TabsList className="grid w-full grid-cols-3 bg-gray-100">
-              <TabsTrigger value="citizen">Citizen</TabsTrigger>
-              <TabsTrigger value="admin">Admin</TabsTrigger>
-              <TabsTrigger value="central-admin">Central Admin</TabsTrigger>
-            </TabsList>
-          </Tabs>
-
-          {/* Error Alert */}
-          {error && (
-            <div className="mb-4 p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
-              <div className="w-4 h-4 rounded-full bg-red-600 flex-shrink-0 mt-0.5" />
-              <p>{error}</p>
-            </div>
-          )}
-
-          {/* Success Alert */}
-          {successMessage && (
-            <div className="mb-4 p-3 text-sm text-green-600 bg-green-50 border border-green-200 rounded-lg flex items-start gap-2">
-              <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-              <p>{successMessage}</p>
-            </div>
-          )}
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {isRegister && (
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
-                <Input
-                  id="fullName"
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Enter your full name"
-                  className="h-11 bg-gray-50 border-gray-200 focus:bg-white transition"
-                  disabled={isLoading}
-                />
-              </div>
-            )}
-
-            {isRegister && (
-              <div className="space-y-2">
-                <Label htmlFor="mobile">Mobile Number</Label>
-                <Input
-                  id="mobile"
-                  type="tel"
-                  value={mobileNumber}
-                  onChange={(e) => setMobileNumber(e.target.value)}
-                  placeholder="Enter your mobile number (10+ digits)"
-                  className="h-11 bg-gray-50 border-gray-200 focus:bg-white transition"
-                  disabled={isLoading}
-                />
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="h-11 bg-gray-50 border-gray-200 focus:bg-white transition"
-                disabled={isLoading}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  className="h-11 bg-gray-50 border-gray-200 focus:bg-white transition pr-10"
-                  disabled={isLoading}
-                />
+          <div className="px-8 py-8">
+            {/* Role Tabs - Modern Design */}
+            <div className="flex gap-2 mb-8 p-1.5 bg-white/5 rounded-2xl border border-white/10 backdrop-blur">
+              {['citizen', 'admin', 'central-admin'].map((role) => (
                 <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
-                  disabled={isLoading}
+                  key={role}
+                  onClick={() => handleTabChange(role)}
+                  className={`flex-1 px-3 py-2 rounded-xl font-medium text-sm transition-all duration-300 ${
+                    activeTab === role
+                      ? 'bg-white text-slate-900 shadow-lg scale-105'
+                      : 'text-white/60 hover:text-white'
+                  }`}
                 >
-                  {showPassword ? (
-                    <EyeOff className="w-4 h-4" />
-                  ) : (
-                    <Eye className="w-4 h-4" />
-                  )}
+                  {role === 'central-admin' ? 'Central' : role.charAt(0).toUpperCase() + role.slice(1)}
                 </button>
-              </div>
+              ))}
             </div>
 
-            <Button
-              type="submit"
-              className={`w-full h-11 ${colors.button} text-white font-semibold transition`}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {isRegister ? 'Creating Account...' : 'Signing In...'}
-                </>
-              ) : (
-                <>
-                  {isRegister ? 'Create Account' : 'Sign In'}
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </>
+            {/* Alert Messages */}
+            {error && (
+              <div className="mb-5 p-4 rounded-2xl bg-red-500/20 border border-red-500/30 backdrop-blur flex items-start gap-3 animate-in slide-in-from-top-2">
+                <div className="w-5 h-5 rounded-full bg-red-400 flex-shrink-0 mt-0.5" />
+                <p className="text-red-100 text-sm">{error}</p>
+              </div>
+            )}
+
+            {successMessage && (
+              <div className="mb-5 p-4 rounded-2xl bg-green-500/20 border border-green-500/30 backdrop-blur flex items-start gap-3 animate-in slide-in-from-top-2">
+                <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                <p className="text-green-100 text-sm">{successMessage}</p>
+              </div>
+            )}
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {isRegister && (
+                <div className="space-y-2">
+                  <label className="text-white/80 text-sm font-medium">Full Name</label>
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Enter your full name"
+                    className="w-full h-11 bg-white/10 border border-white/20 rounded-xl px-4 text-white placeholder-white/40 focus:outline-none focus:border-white/40 focus:bg-white/15 transition backdrop-blur"
+                    disabled={isLoading}
+                  />
+                </div>
               )}
-            </Button>
-          </form>
 
-          {/* Register/Login Toggle for Citizen */}
-          {activeTab === 'citizen' && (
-            <div className="mt-4 text-center">
-              <p className="text-gray-600 text-sm">
-                {isRegister ? 'Already have an account?' : "Don't have an account?"}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsRegister(!isRegister);
-                    setError('');
-                    setSuccessMessage('');
-                  }}
-                  className="ml-1 text-blue-600 hover:text-blue-700 font-semibold transition"
+              {isRegister && (
+                <div className="space-y-2">
+                  <label className="text-white/80 text-sm font-medium">Mobile Number</label>
+                  <input
+                    type="tel"
+                    value={mobileNumber}
+                    onChange={(e) => setMobileNumber(e.target.value)}
+                    placeholder="10+ digits"
+                    className="w-full h-11 bg-white/10 border border-white/20 rounded-xl px-4 text-white placeholder-white/40 focus:outline-none focus:border-white/40 focus:bg-white/15 transition backdrop-blur"
+                    disabled={isLoading}
+                  />
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <label className="text-white/80 text-sm font-medium">Email Address</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  className="w-full h-11 bg-white/10 border border-white/20 rounded-xl px-4 text-white placeholder-white/40 focus:outline-none focus:border-white/40 focus:bg-white/15 transition backdrop-blur"
                   disabled={isLoading}
-                >
-                  {isRegister ? 'Sign In' : 'Register Now'}
-                </button>
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                />
+              </div>
 
-      {/* Features List */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white text-center hover:bg-white/20 transition">
-          <User className="w-8 h-8 mx-auto mb-2 text-blue-300" />
-          <h3 className="font-semibold mb-1">Report Issues</h3>
-          <p className="text-sm text-white/70">Help improve your community</p>
+              <div className="space-y-2">
+                <label className="text-white/80 text-sm font-medium">Password</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full h-11 bg-white/10 border border-white/20 rounded-xl px-4 text-white placeholder-white/40 focus:outline-none focus:border-white/40 focus:bg-white/15 transition backdrop-blur pr-12"
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white/80 transition"
+                    disabled={isLoading}
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className={`w-full h-12 rounded-xl font-semibold text-white transition-all duration-300 transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2 ${
+                  colors.button
+                } shadow-lg hover:shadow-xl disabled:opacity-50`}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    {isRegister ? 'Creating...' : 'Signing in...'}
+                  </>
+                ) : (
+                  <>
+                    {isRegister ? 'Create Account' : 'Sign In'}
+                    <ArrowRight className="w-5 h-5 ml-1" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Register/Login Toggle */}
+            {activeTab === 'citizen' && (
+              <div className="mt-6 text-center">
+                <p className="text-white/70 text-sm">
+                  {isRegister ? "Already have an account? " : "Don't have an account? "}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsRegister(!isRegister);
+                      setError('');
+                      setSuccessMessage('');
+                    }}
+                    className="text-white font-semibold hover:text-blue-300 transition"
+                    disabled={isLoading}
+                  >
+                    {isRegister ? 'Sign In' : 'Register'}
+                  </button>
+                </p>
+              </div>
+            )}
+          </div>
         </div>
-        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white text-center hover:bg-white/20 transition">
-          <Shield className="w-8 h-8 mx-auto mb-2 text-amber-300" />
-          <h3 className="font-semibold mb-1">Manage Issues</h3>
-          <p className="text-sm text-white/70">Track and resolve problems</p>
-        </div>
-        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white text-center hover:bg-white/20 transition">
-          <Settings className="w-8 h-8 mx-auto mb-2 text-purple-300" />
-          <h3 className="font-semibold mb-1">Monitor System</h3>
-          <p className="text-sm text-white/70">Centralized administration</p>
+
+        {/* Features Grid Below Card */}
+        <div className="grid grid-cols-3 gap-3 mt-10">
+          <div className="group backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-4 text-center hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-1">
+            <User className="w-6 h-6 mx-auto mb-2 text-blue-400 group-hover:scale-110 transition-transform" />
+            <p className="text-white/70 text-xs font-medium">Report</p>
+          </div>
+          <div className="group backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-4 text-center hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-1">
+            <Shield className="w-6 h-6 mx-auto mb-2 text-amber-400 group-hover:scale-110 transition-transform" />
+            <p className="text-white/70 text-xs font-medium">Manage</p>
+          </div>
+          <div className="group backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-4 text-center hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-1">
+            <Settings className="w-6 h-6 mx-auto mb-2 text-purple-400 group-hover:scale-110 transition-transform" />
+            <p className="text-white/70 text-xs font-medium">Monitor</p>
+          </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes slide-in-from-top-2 {
+          from { opacity: 0; transform: translateY(-8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-in.slide-in-from-top-2 {
+          animation: slide-in-from-top-2 0.3s ease-out;
+        }
+        .delay-700 {
+          animation-delay: 0.7s;
+        }
+      `}</style>
     </div>
   );
 }

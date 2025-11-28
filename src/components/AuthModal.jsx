@@ -178,7 +178,7 @@ export function AuthModal({ isOpen, userRole, onClose, onLogin }) {
                   key={index}
                   type="button"
                   onClick={() => fillDemoCredentials(cred.email)}
-                  className="w-full p-2 text-left text-xs bg-gray-50 hover:bg-gray-100 rounded border"
+                  className="w-full p-2 text-left text-xs bg-gray-50 hover:bg-gray-100 rounded "
                 >
                   <div className="font-medium">{cred.name}</div>
                   <div className="text-gray-600">{cred.email} / demo123</div>

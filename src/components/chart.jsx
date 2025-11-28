@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as RechartsPrimitive from 'recharts';
 import { cn } from './utils';
 
-// Theme configuration
+
 const THEMES = {
   light: '',
   dark: '.dark',
@@ -14,9 +14,6 @@ const THEMES = {
 
 const ChartContext = React.createContext(null);
 
-/**
- * Hook to use chart context
- */
 function useChart() {
   const context = React.useContext(ChartContext);
   if (!context) {
@@ -25,9 +22,6 @@ function useChart() {
   return context;
 }
 
-/**
- * ChartContainer component
- */
 function ChartContainer({ id, className, children, config, ...props }) {
   const uniqueId = React.useId();
   const chartId = `chart-${id || uniqueId.replace(/:/g, '')}`;
@@ -50,9 +44,6 @@ function ChartContainer({ id, className, children, config, ...props }) {
   );
 }
 
-/**
- * ChartStyle component
- */
 const ChartStyle = ({ id, config }) => {
   const colorConfig = Object.entries(config).filter(([, cfg]) => cfg.theme || cfg.color);
 
@@ -84,9 +75,6 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip;
 
-/**
- * ChartTooltipContent component
- */
 function ChartTooltipContent({
   active,
   payload,
@@ -205,9 +193,7 @@ function ChartTooltipContent({
 
 const ChartLegend = RechartsPrimitive.Legend;
 
-/**
- * ChartLegendContent component
- */
+
 function ChartLegendContent({ className, hideIcon = false, payload, verticalAlign = 'bottom', nameKey }) {
   const { config } = useChart();
 
@@ -247,9 +233,6 @@ function ChartLegendContent({ className, hideIcon = false, payload, verticalAlig
   );
 }
 
-/**
- * Helper function to extract payload config
- */
 function getPayloadConfigFromPayload(config, payload, key) {
   if (typeof payload !== 'object' || payload === null) {
     return undefined;
