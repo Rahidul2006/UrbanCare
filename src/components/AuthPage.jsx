@@ -139,8 +139,8 @@ export function AuthPage({ onLogin }) {
         return;
       }
 
-      // Success
-      onLogin(email.toLowerCase(), password, activeTab);
+      // Success - pass the user data from the API response
+      onLogin(email.toLowerCase(), password, activeTab, data.user);
       setIsLoading(false);
     } catch (err) {
       setError('Error connecting to server. Make sure backend is running on port 5000.');
