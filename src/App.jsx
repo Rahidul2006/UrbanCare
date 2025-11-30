@@ -13,9 +13,9 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
 
   // Handle successful authentication from AuthPage
-  const handleAuthLogin = (email, password, role) => {
-    // Create user object from authentication
-    const user = {
+  const handleAuthLogin = (email, password, role, userData) => {
+    // Create user object from authentication response
+    const user = userData || {
       id: `${role}-${Date.now()}`,
       name: email.split('@')[0], // Fallback name from email
       email: email.toLowerCase(),

@@ -123,10 +123,13 @@ app.post('/api/auth/login', async (req, res) => {
     const connection = await pool.getConnection();
 
     // Find user
-    const [users] = await connection.execute(
-      'SELECT * FROM users WHERE email = ?',
-      [email]
-    );
+    // Find user (optionally filter by role if provided)
+    const query = role
+      ? 'SELECT * FROM users WHERE email = ? AND role = ?'
+      : 'SELECT * FROM users WHERE email = ?';
+    const params = role ? [email, role] : [email];
+
+    const [users] = await connection.execute(query, params);
 
     connection.release();
 
