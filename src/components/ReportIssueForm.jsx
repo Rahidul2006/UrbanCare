@@ -124,96 +124,103 @@ export function ReportIssueForm({ currentUser, onSubmit, onCancel }) {
   const isFormValid = formData.title && formData.description && formData.category && formData.location.address;
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-2xl">
-      <div className="mb-6">
-        <Button variant="ghost" onClick={onCancel} className="mb-4">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button>
-        <h2 className="text-2xl text-gray-900 mb-2">Report an Issue</h2>
-        <p className="text-gray-600">Help improve your community by reporting civic issues</p>
+    <div className="min-h-screen relative bg-gradient-to-br from-blue-50 via-white to-slate-100">
+      {/* Background Elements */}
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-100/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/2 right-1/4 w-96 h-96 bg-indigo-100/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse" style={{ animationDelay: '0.7s' }} />
       </div>
+
+      <div className="container mx-auto px-4 py-10 max-w-4xl relative z-10">
+        <div className="mb-8">
+          <Button variant="ghost" onClick={onCancel} className="mb-4 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
+          <h2 className="text-4xl font-bold text-slate-900 mb-2">Report an Issue</h2>
+          <p className="text-slate-600 text-lg">Help improve your community by reporting civic issues</p>
+        </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Issue Category */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">What type of issue are you reporting?</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-3">
-              {categories.map(category => (
-                <Button
-                  key={category.value}
-                  type="button"
-                  variant={formData.category === category.value ? "default" : "outline"}
-                  className="h-auto p-4 flex flex-col items-center gap-2"
-                  onClick={() => setFormData(prev => ({ ...prev, category: category.value }))}
-                >
-                  <span className="text-2xl">{category.icon}</span>
-                  <span className="text-sm">{category.label}</span>
-                </Button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <div className="bg-white rounded-2xl p-6 ring-1 ring-slate-200/60 shadow-md hover:shadow-lg transition-all">
+          <h3 className="text-xl font-semibold text-slate-900 mb-6">What type of issue are you reporting?</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {categories.map(category => (
+              <button
+                key={category.value}
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, category: category.value }))}
+                className={`group h-auto p-4 flex flex-col items-center gap-2 rounded-xl transition-all duration-300 ${
+                  formData.category === category.value
+                    ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white ring-2 ring-blue-400/50 shadow-lg'
+                    : 'bg-slate-50 text-slate-700 ring-1.5 ring-slate-200/60 hover:ring-slate-300/80 hover:bg-slate-100'
+                }`}
+              >
+                <span className="text-3xl group-hover:scale-110 transition-transform">{category.icon}</span>
+                <span className="text-sm font-medium">{category.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Issue Details */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Describe the Issue</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <div className="bg-white rounded-2xl p-6 ring-1 ring-slate-200/60 shadow-md hover:shadow-lg transition-all">
+          <h3 className="text-xl font-semibold text-slate-900 mb-6">Describe the Issue</h3>
+          <div className="space-y-5">
             <div>
-              <Label htmlFor="title">Issue Title</Label>
+              <Label htmlFor="title" className="text-slate-700 font-medium mb-2">Issue Title</Label>
               <Input
                 id="title"
                 placeholder="Brief description of the issue"
                 value={formData.title}
                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                className="ring-1 ring-slate-200/60 focus:ring-blue-400 border-0"
                 required
               />
             </div>
 
             <div>
-              <Label htmlFor="description">Detailed Description</Label>
+              <Label htmlFor="description" className="text-slate-700 font-medium mb-2">Detailed Description</Label>
               <div className="relative">
                 <Textarea
                   id="description"
                   placeholder="Provide more details about the issue, its location, and impact"
                   value={formData.description}
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  className="ring-1 ring-slate-200/60 focus:ring-blue-400 border-0"
                   rows={4}
                   required
                 />
                 <Button
                   type="button"
-                  variant={isRecording ? "destructive" : "outline"}
                   size="sm"
-                  className="absolute bottom-2 right-2"
                   onClick={toggleRecording}
+                  className={`absolute bottom-2 right-2 transition-all ${
+                    isRecording
+                      ? 'bg-red-500 hover:bg-red-600 text-white'
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                  }`}
                 >
                   {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
                 </Button>
               </div>
               {isRecording && (
-                <div className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                <div className="text-sm text-red-600 mt-2 flex items-center gap-2">
                   <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div>
                   Recording... (speak now)
                 </div>
               )}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Location */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Location</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <div className="bg-white rounded-2xl p-6 ring-1 ring-slate-200/60 shadow-md hover:shadow-lg transition-all">
+          <h3 className="text-xl font-semibold text-slate-900 mb-6">Location</h3>
+          <div className="space-y-4">
             <div>
-              <Label htmlFor="address">Address or Description</Label>
+              <Label htmlFor="address" className="text-slate-700 font-medium mb-2">Address or Description</Label>
               <Input
                 id="address"
                 placeholder="Enter address or location description"
@@ -222,55 +229,51 @@ export function ReportIssueForm({ currentUser, onSubmit, onCancel }) {
                   ...prev, 
                   location: { ...prev.location, address: e.target.value }
                 }))}
+                className="ring-1 ring-slate-200/60 focus:ring-blue-400 border-0"
                 required
               />
             </div>
             
-            <Button
+            <button
               type="button"
-              variant="outline"
               onClick={handleLocationDetect}
-              className="w-full"
+              className="w-full py-2 px-4 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
             >
-              <MapPin className="w-4 h-4 mr-2" />
+              <MapPin className="w-4 h-4" />
               Use Current Location
-            </Button>
-          </CardContent>
-        </Card>
+            </button>
+          </div>
+        </div>
 
         {/* Photos */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Photos (Optional)</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <div className="bg-white rounded-2xl p-6 ring-1 ring-slate-200/60 shadow-md hover:shadow-lg transition-all">
+          <h3 className="text-xl font-semibold text-slate-900 mb-6">Photos (Optional)</h3>
+          <div className="space-y-4">
             {formData.photos.length > 0 && (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3 mb-4">
                 {formData.photos.map((photo, index) => (
-                  <div key={index} className="relative">
+                  <div key={index} className="relative group">
                     <ImageWithFallback
                       src={photo}
                       alt={`Issue photo ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-lg"
+                      className="w-full h-32 object-cover rounded-xl ring-1 ring-slate-200/60 group-hover:ring-slate-300/80 transition-all"
                     />
-                    <Button
+                    <button
                       type="button"
-                      variant="destructive"
-                      size="sm"
-                      className="absolute top-2 right-2"
                       onClick={() => setFormData(prev => ({ 
                         ...prev, 
                         photos: prev.photos.filter((_, i) => i !== index)
                       }))}
+                      className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white font-bold w-6 h-6 rounded-full flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       ×
-                    </Button>
+                    </button>
                   </div>
                 ))}
               </div>
             )}
 
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <div className="border-2 border-dashed border-slate-300 hover:border-slate-400 rounded-xl p-8 text-center transition-all bg-slate-50/50 hover:bg-slate-50">
               <input
                 type="file"
                 id="photos"
@@ -279,44 +282,47 @@ export function ReportIssueForm({ currentUser, onSubmit, onCancel }) {
                 className="hidden"
                 onChange={handlePhotoUpload}
               />
-              <label htmlFor="photos" className="cursor-pointer">
-                <Camera className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-600 mb-2">Add photos to help identify the issue</p>
-                <Button type="button" variant="outline" asChild>
-                  <span>
-                    <Upload className="w-4 h-4 mr-2" />
-                    Choose Photos
-                  </span>
-                </Button>
+              <label htmlFor="photos" className="cursor-pointer block">
+                <Camera className="w-8 h-8 text-slate-400 mx-auto mb-3" />
+                <p className="text-slate-600 font-medium mb-3">Add photos to help identify the issue</p>
+                <span className="inline-flex items-center gap-2 px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl transition-all">
+                  <Upload className="w-4 h-4" />
+                  Choose Photos
+                </span>
               </label>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Submit */}
-        <div className="flex gap-3 pt-4">
-          <Button
+        <div className="flex gap-3 pt-2 pb-4">
+          <button
             type="button"
-            variant="outline"
             onClick={onCancel}
-            className="flex-1"
+            className="flex-1 py-3 px-6 rounded-xl bg-white ring-1.5 ring-slate-200/60 hover:ring-slate-300/80 text-slate-700 font-semibold transition-all hover:shadow-md"
           >
             Cancel
-          </Button>
-          <Button
+          </button>
+          <button
             type="submit"
             disabled={!isFormValid || isSubmitting}
-            className="flex-1"
+            className="flex-1 py-3 px-6 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:from-slate-400 disabled:to-slate-400 text-white font-semibold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
           >
             {isSubmitting ? (
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Submitting...
+              </>
             ) : (
-              <Send className="w-4 h-4 mr-2" />
+              <>
+                <Send className="w-4 h-4" />
+                Submit Report
+              </>
             )}
-            {isSubmitting ? 'Submitting...' : 'Submit Report'}
-          </Button>
+          </button>
         </div>
       </form>
+      </div>
     </div>
   );
 }
