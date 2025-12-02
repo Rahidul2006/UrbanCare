@@ -63,7 +63,7 @@ export function IssueCard({ issue, showReporter = true, userRole }) {
   };
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden border border-gray-200 bg-gradient-to-br from-blue-100 to-gray-50 shadow-sm">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3 flex-1">

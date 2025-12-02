@@ -104,12 +104,12 @@ export function CitizenInterface({ currentUser }) {
         {/* Tabs for different views */}
         <Tabs defaultValue="my-reports" className="w-full">
           <div className="ring-1.5 ring-slate-200/60 rounded-2xl shadow-md hover:shadow-lg transition-all p-2 bg-slate-50/50 backdrop-blur-sm mb-8">
-            <TabsList className="grid w-full grid-cols-2 bg-transparent p-0 h-auto">
-              <TabsTrigger value="my-reports" className="flex items-center gap-2 text-slate-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:ring-1 data-[state=active]:ring-blue-400/30 rounded-xl transition-all font-medium py-2">
+            <TabsList className="grid w-full grid-cols-2 gap-3 bg-transparent p-0 h-auto">
+              <TabsTrigger value="my-reports" className="flex items-center gap-2 text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 shadow-md hover:shadow-lg  rounded-xl transition-all font-medium py-2">
                 <History className="w-4 h-4" />
                 My Reports
               </TabsTrigger>
-              <TabsTrigger value="nearby" className="flex items-center gap-2 text-slate-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-blue-500 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:ring-1 data-[state=active]:ring-cyan-400/30 rounded-xl transition-all font-medium py-2">
+              <TabsTrigger value="nearby" className="flex items-center gap-2 text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 shadow-md hover:shadow-lg rounded-xl transition-all font-medium py-2">
                 <MapPin className="w-4 h-4" />
                 Nearby Issues
               </TabsTrigger>
