@@ -9,6 +9,22 @@ import { roleColors } from '../utils/roleColors';
 
 const API_BASE_URL = 'http://localhost:5000';
 
+// Demo credentials - hardcoded for offline/dev mode when server is not running
+const demoCredentials = {
+  citizen: [
+    { email: 'alex@example.com', password: 'demo123', name: 'Alex Johnson', mobile: '9876543210' },
+    { email: 'maria@example.com', password: 'demo123', name: 'Maria Garcia', mobile: '9876543211' }
+  ],
+  admin: [
+    { email: 'admin@city.gov', password: 'demo123', name: 'Sarah Martinez', mobile: '1234567890' },
+    { email: 'mike@city.gov', password: 'demo123', name: 'Mike Wilson', mobile: '1234567891' }
+  ],
+  'central-admin': [
+    { email: 'central.admin@city.gov', password: 'demo123', name: 'Sarah Johnson', mobile: '1234567892' },
+    { email: 'system.admin@city.gov', password: 'demo123', name: 'Michael Chen', mobile: '1234567893' }
+  ]
+};
+
 export function AuthPage({ onLogin }) {
   const [activeTab, setActiveTab] = useState('citizen');
   const [email, setEmail] = useState('');
@@ -143,8 +159,29 @@ export function AuthPage({ onLogin }) {
       onLogin(email.toLowerCase(), password, activeTab, data.user);
       setIsLoading(false);
     } catch (err) {
-      setError('Error connecting to server. Make sure backend is running on port 5000.');
-      setIsLoading(false);
+      // Fallback to demo credentials when server is not running
+      const credentials = demoCredentials[activeTab];
+      const validUser = credentials.find(
+        cred => cred.email.toLowerCase() === email.toLowerCase() && cred.password === password
+      );
+
+      if (validUser) {
+        // Demo login successful - simulate API delay
+        setTimeout(() => {
+          setSuccessMessage('Demo login successful! (Server not running)');
+          onLogin(email.toLowerCase(), password, activeTab, {
+            id: Math.random().toString(36).substr(2, 9),
+            email: validUser.email,
+            name: validUser.name,
+            role: activeTab,
+            mobile: validUser.mobile
+          });
+          setIsLoading(false);
+        }, 800);
+      } else {
+        setError('Server not running. Please use demo credentials: alex@example.com / demo123 for citizen, admin@city.gov / demo123 for admin, or central.admin@city.gov / demo123 for central admin. Password: demo123');
+        setIsLoading(false);
+      }
     }
   };
 
@@ -216,6 +253,30 @@ export function AuthPage({ onLogin }) {
                 </button>
               ))}
             </div>
+
+            {/* Demo Credentials Quick Access - visible when not registering */}
+            {/* {!isRegister && (
+              <div className="mb-5 p-3 rounded-xl bg-blue-500/10 border border-blue-500/30 backdrop-blur">
+                <p className="text-blue-100 text-xs font-semibold mb-2">📌 Demo Credentials (Server Offline Mode):</p>
+                <div className="space-y-1">
+                  {demoCredentials[activeTab].map((cred, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setEmail(cred.email);
+                        setPassword(cred.password);
+                        setError('');
+                      }}
+                      className="w-full text-left text-blue-200 text-xs p-2 rounded hover:bg-blue-500/20 transition flex justify-between items-center group"
+                    >
+                      <span className="font-mono">{cred.email}</span>
+                      <span className="text-blue-300/50 group-hover:text-blue-300 text-xs">click to fill</span>
+                    </button>
+                  ))}
+                  <p className="text-blue-200/60 text-xs pt-1 border-t border-blue-500/20 mt-1">Password for all: <span className="font-mono font-bold">demo123</span></p>
+                </div>
+              </div>
+            )} */}
 
             {/* Alert Messages */}
             {error && (
