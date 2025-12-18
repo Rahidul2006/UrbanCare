@@ -7,16 +7,10 @@ import { Input } from './input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
 import { 
   LogOut, 
-  Search, 
-  MapPin, 
   Clock,
   CheckCircle,
   AlertTriangle,
   Users,
-  TrendingUp,
-  BarChart3,
-  Settings,
-  Filter,
   Activity,
   Building2,
   Menu,
@@ -312,8 +306,8 @@ export function CentralAdminDashboard({ currentUser, onLogout }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {centralAdminDepartments.map((dept) => {
-          const activeIssues = centralAdminIssues.filter(i => i.assignedDepartment === dept.name && i.status !== 'resolved').length;
-          const resolvedIssues = centralAdminIssues.filter(i => i.assignedDepartment === dept.name && i.status === 'resolved').length;
+          const activeIssues = issues.filter(i => i.assignedDepartment === dept.name && i.status !== 'resolved').length;
+          const resolvedIssues = issues.filter(i => i.assignedDepartment === dept.name && i.status === 'resolved').length;
           
           return (
             <Card key={dept.id} className="border-0 shadow-md hover:shadow-lg transition-all overflow-hidden">
