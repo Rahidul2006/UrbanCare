@@ -96,7 +96,6 @@ export default function App() {
       {/* Main Content */}
       {userRole === 'citizen' && <CitizenInterface currentUser={currentUser} />}
       {userRole === 'admin' && <AdminInterface currentUser={currentUser} />}
-      {userRole === 'central-admin' && <CentralAdminDashboard currentUser={currentUser} onLogout={handleLogout} />}
     </div>
   );
 }
