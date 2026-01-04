@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BarChart3, Filter, MapPin, Users, Clock, CheckCircle, AlertTriangle, TrendingUp, Target, Zap, Settings, Bell, Calendar, TrendingDown, Percent } from 'lucide-react';
 import { Button } from './button';
 import { Card, CardContent, CardHeader, CardTitle } from './card';
@@ -14,7 +14,32 @@ import { roleColors } from '../utils/roleColors';
 
 export function AdminInterface({ currentUser }) {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [issues, setIssues] = useState(mockIssues);
+  const [issues, setIssues] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch issues from backend
+  useEffect(() => {
+    const fetchIssues = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/issues');
+        const data = await response.json();
+
+        if (data.success && data.issues) {
+          console.log('Fetched issues for admin:', data.issues);
+          setIssues(data.issues);
+        } else {
+          setIssues(mockIssues);
+        }
+      } catch (error) {
+        console.error('Error fetching issues:', error);
+        setIssues(mockIssues);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchIssues();
+  }, []);
 
   const handleIssueUpdate = (updatedIssue) => {
     setIssues(prev => prev.map(issue => 
