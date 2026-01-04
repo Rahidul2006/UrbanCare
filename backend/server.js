@@ -36,7 +36,15 @@ async function initializeDatabase() {
       )
     `);
 
-    // Create issues table
+    // Drop existing issues table if it exists without updated_at
+    try {
+      await client.query(`ALTER TABLE issues ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
+      console.log('✅ Added updated_at column to issues table');
+    } catch (e) {
+      console.log('ℹ️  updated_at column already exists');
+    }
+
+    // Create issues table if it doesn't exist
     await client.query(`
       CREATE TABLE IF NOT EXISTS issues (
         id SERIAL PRIMARY KEY,
@@ -52,6 +60,7 @@ async function initializeDatabase() {
         user_id INT,
         images TEXT[],
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         resolved_at TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id)
       )
@@ -238,6 +247,342 @@ app.post('/api/auth/check-email', async (req, res) => {
   } catch (error) {
     console.error('Check email error:', error);
     res.status(500).json({ error: 'Check failed' });
+  }
+});
+
+// =======================
+// ISSUE REPORTING ROUTES
+// =======================
+
+// Submit a new issue (citizen)
+app.post('/api/issues', async (req, res) => {
+  const { title, description, category, location, userId } = req.body;
+
+  console.log('📩 Received issue submission:', { title, description, category, location, userId });
+
+  // Validate required fields
+  if (!title || !description || !category || !userId) {
+    console.log('❌ Validation failed - missing required fields');
+    return res.status(400).json({ error: 'Title, description, category, and user ID are required' });
+  }
+
+  if (!location || !location.address) {
+    console.log('❌ Validation failed - missing location');
+    return res.status(400).json({ error: 'Location with address is required' });
+  }
+
+  try {
+    console.log('🔍 Validating with database...');
+    // Check if user exists
+    const userCheck = await pool.query('SELECT id FROM users WHERE id = $1', [userId]);
+    if (userCheck.rows.length === 0) {
+      console.log('❌ User not found:', userId);
+      return res.status(400).json({ error: 'User not found in database' });
+    }
+    
+    // Determine department based on category
+    const categoryMap = {
+      pothole: 'Public Works',
+      streetlight: 'Electrical Services',
+      trash: 'Sanitation',
+      graffiti: 'Parks & Recreation',
+      signage: 'Public Works',
+      water: 'Public Works',
+      sidewalk: 'Public Works',
+      other: 'General Services'
+    };
+
+    const department = categoryMap[category] || 'General Services';
+
+    console.log('💾 Inserting issue into database...');
+    // Insert issue into database (WITHOUT images)
+    const result = await pool.query(
+      `INSERT INTO issues (
+        title, description, category, location_address, 
+        location_lat, location_lng, department, user_id, 
+        status, priority
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      RETURNING *`,
+      [
+        title,
+        description,
+        category,
+        location.address || '',
+        location.latitude || null,
+        location.longitude || null,
+        department,
+        userId,
+        'submitted',
+        'medium'
+      ]
+    );
+
+    const issue = result.rows[0];
+    console.log('✅ Issue created with ID:', issue.id);
+
+    // Get user info
+    const userResult = await pool.query('SELECT name, email FROM users WHERE id = $1', [userId]);
+    const user = userResult.rows[0] || { name: 'Unknown', email: 'unknown@example.com' };
+
+    console.log('📤 Sending response...');
+    res.status(201).json({
+      success: true,
+      issue: {
+        id: issue.id,
+        title: issue.title,
+        description: issue.description,
+        category: issue.category,
+        status: issue.status,
+        priority: issue.priority,
+        location: {
+          address: issue.location_address,
+          latitude: issue.location_lat,
+          longitude: issue.location_lng
+        },
+        reportedBy: {
+          id: issue.user_id,
+          name: user.name,
+          email: user.email
+        },
+        department: issue.department,
+        createdAt: issue.created_at,
+        updatedAt: issue.updated_at
+      }
+    });
+  } catch (error) {
+    console.error('❌ Issue submission error:', error.message);
+    console.error('Full error:', error);
+    res.status(500).json({ error: 'Failed to submit issue: ' + (error.message || 'Unknown database error') });
+  }
+});  
+
+// Get all issues with filters (admin & central admin)
+app.get('/api/issues', async (req, res) => {
+  const { status, priority, department, userId, limit = 100, offset = 0 } = req.query;
+
+  try {
+    let query = 'SELECT * FROM issues WHERE 1=1';
+    const params = [];
+    let paramCount = 0;
+
+    if (status) {
+      paramCount++;
+      query += ` AND status = $${paramCount}`;
+      params.push(status);
+    }
+
+    if (priority) {
+      paramCount++;
+      query += ` AND priority = $${paramCount}`;
+      params.push(priority);
+    }
+
+    if (department) {
+      paramCount++;
+      query += ` AND department = $${paramCount}`;
+      params.push(department);
+    }
+
+    if (userId) {
+      paramCount++;
+      query += ` AND user_id = $${paramCount}`;
+      params.push(userId);
+    }
+
+    query += ' ORDER BY created_at DESC';
+
+    paramCount++;
+    query += ` LIMIT $${paramCount}`;
+    params.push(limit);
+
+    paramCount++;
+    query += ` OFFSET $${paramCount}`;
+    params.push(offset);
+
+    const result = await pool.query(query, params);
+    const issues = result.rows;
+
+    // Get user info for each issue
+    const issuesWithUsers = await Promise.all(
+      issues.map(async (issue) => {
+        const userResult = await pool.query('SELECT name, email FROM users WHERE id = $1', [issue.user_id]);
+        const user = userResult.rows[0];
+
+        return {
+          id: issue.id,
+          title: issue.title,
+          description: issue.description,
+          category: issue.category,
+          status: issue.status,
+          priority: issue.priority,
+          location: {
+            address: issue.location_address,
+            latitude: issue.location_lat,
+            longitude: issue.location_lng
+          },
+          reportedBy: {
+            id: issue.user_id,
+            name: user?.name || 'Unknown',
+            email: user?.email || 'unknown@example.com'
+          },
+          department: issue.department,
+          createdAt: issue.created_at,
+          updatedAt: issue.updated_at,
+          resolvedAt: issue.resolved_at
+        };
+      })
+    );
+
+    res.json({
+      success: true,
+      issues: issuesWithUsers
+    });
+  } catch (error) {
+    console.error('Get issues error:', error);
+    res.status(500).json({ error: 'Failed to fetch issues' });
+  }
+});
+
+// Get single issue by ID
+app.get('/api/issues/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await pool.query('SELECT * FROM issues WHERE id = $1', [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Issue not found' });
+    }
+
+    const issue = result.rows[0];
+
+    // Get user info
+    const userResult = await pool.query('SELECT name, email FROM users WHERE id = $1', [issue.user_id]);
+    const user = userResult.rows[0];
+
+    res.json({
+      success: true,
+      issue: {
+        id: issue.id,
+        title: issue.title,
+        description: issue.description,
+        category: issue.category,
+        status: issue.status,
+        priority: issue.priority,
+        location: {
+          address: issue.location_address,
+          latitude: issue.location_lat,
+          longitude: issue.location_lng
+        },
+        photos: issue.images,
+        reportedBy: {
+          id: issue.user_id,
+          name: user?.name || 'Unknown',
+          email: user?.email || 'unknown@example.com'
+        },
+        department: issue.department,
+        createdAt: issue.created_at,
+        updatedAt: issue.updated_at,
+        resolvedAt: issue.resolved_at
+      }
+    });
+  } catch (error) {
+    console.error('Get issue error:', error);
+    res.status(500).json({ error: 'Failed to fetch issue' });
+  }
+});
+
+// Update issue (admin & central admin)
+app.put('/api/issues/:id', async (req, res) => {
+  const { id } = req.params;
+  const { status, priority, department } = req.body;
+
+  try {
+    const result = await pool.query('SELECT * FROM issues WHERE id = $1', [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Issue not found' });
+    }
+
+    const issue = result.rows[0];
+    const updateData = {
+      status: status || issue.status,
+      priority: priority || issue.priority,
+      department: department || issue.department
+    };
+
+    // Set resolved_at if status is being set to resolved
+    const resolvedAt = updateData.status === 'resolved' ? new Date() : issue.resolved_at;
+
+    const updateResult = await pool.query(
+      `UPDATE issues 
+       SET status = $1, priority = $2, department = $3, resolved_at = $4, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $5
+       RETURNING *`,
+      [updateData.status, updateData.priority, updateData.department, resolvedAt, id]
+    );
+
+    const updatedIssue = updateResult.rows[0];
+
+    // Get user info
+    const userResult = await pool.query('SELECT name, email FROM users WHERE id = $1', [updatedIssue.user_id]);
+    const user = userResult.rows[0];
+
+    res.json({
+      success: true,
+      issue: {
+        id: updatedIssue.id,
+        title: updatedIssue.title,
+        description: updatedIssue.description,
+        category: updatedIssue.category,
+        status: updatedIssue.status,
+        priority: updatedIssue.priority,
+        location: {
+          address: updatedIssue.location_address,
+          latitude: updatedIssue.location_lat,
+          longitude: updatedIssue.location_lng
+        },
+        reportedBy: {
+          id: updatedIssue.user_id,
+          name: user?.name || 'Unknown',
+          email: user?.email || 'unknown@example.com'
+        },
+        department: updatedIssue.department,
+        createdAt: updatedIssue.created_at,
+        updatedAt: updatedIssue.updated_at,
+        resolvedAt: updatedIssue.resolved_at
+      }
+    });
+  } catch (error) {
+    console.error('Update issue error:', error);
+    res.status(500).json({ error: 'Failed to update issue' });
+  }
+});
+
+// Get issue statistics (for central admin)
+app.get('/api/issues/stats/overview', async (req, res) => {
+  try {
+    const totalResult = await pool.query('SELECT COUNT(*) FROM issues');
+    const resolvedResult = await pool.query("SELECT COUNT(*) FROM issues WHERE status = 'resolved'");
+    const byStatusResult = await pool.query(
+      "SELECT status, COUNT(*) as count FROM issues GROUP BY status"
+    );
+    const byDepartmentResult = await pool.query(
+      "SELECT department, COUNT(*) as count FROM issues GROUP BY department"
+    );
+
+    res.json({
+      success: true,
+      stats: {
+        totalIssues: parseInt(totalResult.rows[0].count),
+        resolvedIssues: parseInt(resolvedResult.rows[0].count),
+        byStatus: byStatusResult.rows,
+        byDepartment: byDepartmentResult.rows
+      }
+    });
+  } catch (error) {
+    console.error('Stats error:', error);
+    res.status(500).json({ error: 'Failed to fetch statistics' });
   }
 });
 
