@@ -54,57 +54,135 @@ export function ReportIssueForm({ currentUser, onSubmit, onCancel }) {
   const handlePhotoUpload = (event) => {
     const files = event.target.files;
     if (files) {
-      const mockUrls = Array.from(files).map((file, index) => 
-        `https://images.unsplash.com/photo-1600880292203-757bb62b4baf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=400&h=300&mock=${Date.now()}-${index}`
-      );
+      const newPhotos = Array.from(files).map(file => {
+        return {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          url: URL.createObjectURL(file)
+        };
+      });
       setFormData(prev => ({
         ...prev,
-        photos: [...prev.photos, ...mockUrls]
+        photos: [...prev.photos, ...newPhotos]
       }));
     }
   };
 
+  const removePhoto = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      photos: prev.photos.filter((_, i) => i !== index)
+    }));
+  };
+
   const toggleRecording = () => {
     setIsRecording(!isRecording);
-    if (!isRecording) {
-      setTimeout(() => {
-        setIsRecording(false);
-        setFormData(prev => ({
-          ...prev,
-          description: prev.description + (prev.description ? ' ' : '') + 
-            'Large pothole causing vehicle damage near the main intersection.'
-        }));
-      }, 3000);
+    if (isRecording) {
+      setIsRecording(false);
+    } else {
+      setIsRecording(true);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate form
+    if (!formData.title.trim()) {
+      alert('Please enter an issue title');
+      return;
+    }
+    if (!formData.description.trim()) {
+      alert('Please enter a description');
+      return;
+    }
+    if (!formData.category) {
+      alert('Please select a category');
+      return;
+    }
+    if (!formData.location.address.trim()) {
+      alert('Please provide a location');
+      return;
+    }
+
     setIsSubmitting(true);
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      console.log('📤 Form validation passed, preparing to submit...');
+      console.log('Submitting issue with data:', {
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        location: formData.location,
+        userId: currentUser.id
+      });
 
-    const newIssue = {
-      id: `issue-${Date.now()}`,
-      title: formData.title,
-      description: formData.description,
-      category: formData.category,
-      status: 'submitted',
-      priority: 'medium',
-      location: formData.location,
-      photos: formData.photos,
-      reportedBy: {
-        id: currentUser.id,
-        name: currentUser.name,
-        email: currentUser.email
-      },
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      department: getDepartmentForCategory(formData.category),
-      updates: []
-    };
+      const response = await fetch('http://localhost:5000/api/issues', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title: formData.title.trim(),
+          description: formData.description.trim(),
+          category: formData.category,
+          location: {
+            address: formData.location.address.trim(),
+            latitude: formData.location.latitude || null,
+            longitude: formData.location.longitude || null
+          },
+          userId: currentUser.id
+        })
+      });
 
-    onSubmit(newIssue);
+      console.log('📥 Response received, status:', response.status);
+      const data = await response.json();
+      console.log('📄 Response data:', data);
+
+      if (!response.ok) {
+        console.error('❌ Server error:', data);
+        const errorMsg = data.error || 'Unknown error';
+        console.error('Full error:', errorMsg);
+        alert(`Failed to submit issue: ${errorMsg}`);
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!data.issue || !data.issue.id) {
+        console.error('❌ Invalid response:', data);
+        alert('Error: Invalid response from server');
+        setIsSubmitting(false);
+        return;
+      }
+
+      console.log('✅ Issue submitted successfully:', data);
+
+      // Format the response to include photos for frontend display only
+      const newIssue = {
+        id: data.issue.id,
+        title: data.issue.title,
+        description: data.issue.description,
+        category: data.issue.category,
+        status: data.issue.status,
+        priority: data.issue.priority,
+        location: data.issue.location,
+        photos: formData.photos || [],  // Use locally stored photos for display
+        reportedBy: data.issue.reportedBy,
+        department: data.issue.department,
+        createdAt: data.issue.createdAt,
+        updatedAt: data.issue.updatedAt,
+        updates: []
+      };
+
+      console.log('Calling onSubmit with issue:', newIssue);
+      onSubmit(newIssue);
+    } catch (error) {
+      console.error('Error submitting issue:', error);
+      const errorMsg = error?.message || 'Network error or server not responding';
+      alert(`Error submitting issue: ${errorMsg}. Please check that the server is running on http://localhost:5000`);
+      setIsSubmitting(false);
+    }
   };
 
   const getDepartmentForCategory = (category) => {
@@ -254,16 +332,13 @@ export function ReportIssueForm({ currentUser, onSubmit, onCancel }) {
                 {formData.photos.map((photo, index) => (
                   <div key={index} className="relative group">
                     <ImageWithFallback
-                      src={photo}
+                      src={typeof photo === 'string' ? photo : photo.url}
                       alt={`Issue photo ${index + 1}`}
                       className="w-full h-32 object-cover rounded-xl ring-1 ring-slate-200/60 group-hover:ring-slate-300/80 transition-all"
                     />
                     <button
                       type="button"
-                      onClick={() => setFormData(prev => ({ 
-                        ...prev, 
-                        photos: prev.photos.filter((_, i) => i !== index)
-                      }))}
+                      onClick={() => removePhoto(index)}
                       className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white font-bold w-6 h-6 rounded-full flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       ×

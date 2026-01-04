@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MapPin, AlertTriangle, Clock, User2, Filter, Search, CheckCircle, TrendingUp, Activity, Building2, LogOut, Eye, ChevronRight, MapPin as LocationIcon, Calendar, Zap, MoreVertical, Edit, Trash2, Plus, CheckCheck, Loader } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './card';
 import { Badge } from './badge';
@@ -9,11 +9,35 @@ import { Avatar, AvatarImage, AvatarFallback } from './avatar';
 import { IssueCard } from './IssueCard';
 import { format } from 'date-fns';
 
-export function AdminDashboard({ issues, currentUser, onIssueUpdate, onLogout }) {
+export function AdminDashboard({ issues: initialIssues, currentUser, onIssueUpdate, onLogout }) {
+  const [issues, setIssues] = useState(initialIssues || []);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterPriority, setFilterPriority] = useState('all');
   const [filterDepartment, setFilterDepartment] = useState('all');
+
+  // Fetch issues from backend on component mount
+  useEffect(() => {
+    const fetchIssues = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/issues');
+        const data = await response.json();
+        
+        if (data.success) {
+          setIssues(data.issues);
+        }
+      } catch (error) {
+        console.error('Error fetching issues:', error);
+        // Fall back to initial issues if fetch fails
+        setIssues(initialIssues || []);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchIssues();
+  }, [initialIssues]);
 
   const filteredIssues = issues.filter(issue => {
     const matchesSearch = issue.title.toLowerCase().includes(searchTerm.toLowerCase()) ||

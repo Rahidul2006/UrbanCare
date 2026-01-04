@@ -97,7 +97,7 @@ export function IssueCard({ issue, showReporter = true, userRole }) {
         {issue.photos && issue.photos.length > 0 && (
           <div className="mb-4">
             <ImageWithFallback
-              src={issue.photos[0]}
+              src={typeof issue.photos[0] === 'string' ? issue.photos[0] : issue.photos[0].url}
               alt="Issue photo"
               className="w-full h-48 object-cover rounded-lg"
             />

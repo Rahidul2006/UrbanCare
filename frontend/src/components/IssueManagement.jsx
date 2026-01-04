@@ -92,45 +92,90 @@ export function IssueManagement({ issues, currentUser, onIssueUpdate }) {
     const issue = issues.find(i => i.id === issueId);
     if (!issue) return;
 
-    const updatedIssue = {
-      ...issue,
-      status: newStatus,
-      updatedAt: new Date().toISOString(),
-      resolvedAt: newStatus === 'resolved' ? new Date().toISOString() : issue.resolvedAt,
-      updates: [
-        ...issue.updates,
-        {
-          id: `update-${Date.now()}`,
-          message: `Status updated to ${newStatus}`,
-          author: { name: currentUser.name, role: 'admin' },
-          timestamp: new Date().toISOString()
+    // Send update to backend
+    const updateIssueOnServer = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/issues/${issueId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            status: newStatus,
+            priority: issue.priority,
+            department: issue.department
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          const updatedIssue = {
+            ...data.issue,
+            updates: [
+              ...(issue.updates || []),
+              {
+                id: `update-${Date.now()}`,
+                message: `Status updated to ${newStatus}`,
+                author: { name: currentUser.name, role: 'admin' },
+                timestamp: new Date().toISOString()
+              }
+            ]
+          };
+
+          onIssueUpdate(updatedIssue);
         }
-      ]
+      } catch (error) {
+        console.error('Error updating issue status:', error);
+      }
     };
 
-    onIssueUpdate(updatedIssue);
+    updateIssueOnServer();
   };
 
   const handlePriorityUpdate = (issueId, newPriority) => {
     const issue = issues.find(i => i.id === issueId);
     if (!issue) return;
 
-    const updatedIssue = {
-      ...issue,
-      priority: newPriority,
-      updatedAt: new Date().toISOString(),
-      updates: [
-        ...issue.updates,
-        {
-          id: `update-${Date.now()}`,
-          message: `Priority updated to ${newPriority}`,
-          author: { name: currentUser.name, role: 'admin' },
-          timestamp: new Date().toISOString()
+    // Send update to backend
+    const updateIssueOnServer = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/issues/${issueId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            status: issue.status,
+            priority: newPriority,
+            department: issue.department
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          const updatedIssue = {
+            ...data.issue,
+            updates: [
+              ...(issue.updates || []),
+              {
+                id: `update-${Date.now()}`,
+                message: `Priority updated to ${newPriority}`,
+                author: { name: currentUser.name, role: 'admin' },
+                timestamp: new Date().toISOString()
+              }
+            ]
+          };
+
+          onIssueUpdate(updatedIssue);
         }
-      ]
+      } catch (error) {
+        console.error('Error updating issue priority:', error);
+      }
     };
 
-    onIssueUpdate(updatedIssue);
+    updateIssueOnServer();
   };
 
   const handleAssignStaff = (issueId, staffId) => {

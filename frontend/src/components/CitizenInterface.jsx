@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, MapPin, Clock, CheckCircle, AlertCircle, Camera, History } from 'lucide-react';
 import { ReportIssueForm } from './ReportIssueForm';
 import { IssueCard } from './IssueCard';
@@ -8,11 +8,39 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs';
 
 export function CitizenInterface({ currentUser }) {
   const [showReportForm, setShowReportForm] = useState(false);
-  const [userIssues, setUserIssues] = useState(
-    mockIssues.filter(issue => issue.reportedBy.id === currentUser.id)
-  );
+  const [userIssues, setUserIssues] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch user's issues from backend
+  useEffect(() => {
+    const fetchUserIssues = async () => {
+      try {
+        console.log('Fetching issues for user:', currentUser.id);
+        const response = await fetch(`http://localhost:5000/api/issues?userId=${currentUser.id}`);
+        const data = await response.json();
+
+        if (data.success && data.issues) {
+          console.log('Fetched issues:', data.issues);
+          setUserIssues(data.issues);
+        } else {
+          // Fall back to mock data filtered by user
+          console.log('Using fallback mock data');
+          setUserIssues(mockIssues.filter(issue => issue.reportedBy.id === currentUser.id));
+        }
+      } catch (error) {
+        console.error('Error fetching issues:', error);
+        // Fall back to mock data
+        setUserIssues(mockIssues.filter(issue => issue.reportedBy.id === currentUser.id));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserIssues();
+  }, [currentUser.id]);
 
   const handleIssueSubmitted = (newIssue) => {
+    console.log('New issue submitted:', newIssue);
     setUserIssues(prev => [newIssue, ...prev]);
     setShowReportForm(false);
   };
@@ -120,7 +148,13 @@ export function CitizenInterface({ currentUser }) {
             <div className="space-y-8">
               <h3 className="text-2xl text-slate-900 font-semibold">Your Reported Issues</h3>
               
-              {userIssues.length === 0 ? (
+              {isLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="h-32 bg-gradient-to-r from-slate-200 to-slate-100 rounded-2xl animate-pulse"></div>
+                  ))}
+                </div>
+              ) : userIssues.length === 0 ? (
                 <div className="group bg-gradient-to-br from-slate-50 via-white to-slate-50 rounded-3xl p-16 text-center hover:shadow-xl transition-all duration-300 ring-1.5 ring-slate-200/60 hover:ring-slate-300/80 shadow-md hover:shadow-slate-200/50 relative overflow-hidden">
                   <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-400 to-transparent opacity-30 group-hover:opacity-50" />
                   <Camera className="w-16 h-16 text-slate-300 mx-auto mb-6 group-hover:scale-110 transition-transform" />

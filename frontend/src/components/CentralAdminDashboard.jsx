@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from './card';
 import { Button } from './button';
 import { Badge } from './badge';
@@ -24,7 +24,39 @@ import { format } from 'date-fns';
 export function CentralAdminDashboard({ currentUser, onLogout }) {
   const [activeSection, setActiveSection] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [issues, setIssues] = useState(centralAdminIssues);
+  const [issues, setIssues] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch issues and stats from backend on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch all issues
+        const issuesResponse = await fetch('http://localhost:5000/api/issues');
+        const issuesData = await issuesResponse.json();
+        
+        if (issuesData.success) {
+          setIssues(issuesData.issues);
+        }
+
+        // Fetch stats
+        const statsResponse = await fetch('http://localhost:5000/api/issues/stats/overview');
+        const statsData = await statsResponse.json();
+        
+        if (statsData.success) {
+          setStats(statsData.stats);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        // Fall back to initial data if fetch fails
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   // Handle issue updates
   const handleIssueUpdate = (updatedIssue) => {
